@@ -36,20 +36,6 @@ jobs:
 
     - name: 检查Actions
       uses: actions/checkout@main
-
-    - name: 最大化编译空间
-      uses: easimon/maximize-build-space@master
-      with:
-        root-reserve-mb: 4096
-        swap-size-mb: 1024
-        temp-reserve-mb: 200
-        build-mount-path: /workdir
-        overprovision-lvm: 'true'
-        remove-dotnet: 'true'
-        remove-android: 'true'
-        remove-haskell: 'true'
-        remove-codeql: 'true'
-        remove-docker-images: 'true'
           
     - name: 检查服务器配置
       run: |
@@ -73,7 +59,6 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
         sudo apt-get update -y
         sudo apt-get upgrade -y
         sudo apt-get install -y build-essential clang flex bison g++ gawk gcc-multilib \ 
