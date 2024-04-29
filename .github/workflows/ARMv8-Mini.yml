@@ -39,7 +39,7 @@ jobs:
           
     - name: 检查服务器配置
       run: |
-        [ -e $CONFIG_FILE ] && echo "配置文件存在"
+        [ -e $CONFIG_FILE ] && echo "$CONFIG_FILE配置文件存在"
         
         echo "警告⚠"
         echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
