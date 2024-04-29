@@ -179,14 +179,20 @@ jobs:
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
     - name: 清理磁盘空间
+      id: clean
       if: (!cancelled())
       run: |
         echo "清理之前："
         df -hT
         
         mkdir openwrt-armvirt
-        mv openwrt/bin/targets/*/*/*.tar.gz openwrt-armvirt/
-        
+        mv openwrt/bin/targets/*/*/*rootfs.tar.gz openwrt-armvirt/
+        mv openwrt/.config openwrt-armvirt/config
+
+        # Generate sha256sum file
+        cd openwrt-armvirt/
+        for file in *; do [[ ! -d "${file}" ]] && sha256sum "${file}" >"${file}.sha"; done
+          
         echo -e "\n"
         echo "列出空间占用前10的目录或文件："
         sudo du -h --max-depth=1 /workdir |sort -nr | head -10
@@ -202,9 +208,11 @@ jobs:
         echo -e "\n"
         echo "列出空间占用前10的目录或文件："
         sudo du -h --max-depth=1 /builder |sort -nr | head -10
-
+        echo "status=success" >> ${GITHUB_OUTPUT}
+        
     - name: 打包内核
       uses: unifreq/openwrt_packit@master
+      if: ${{ steps.clean.outputs.status }} == 'success' && !cancelled()
       env:
         WHOAMI: qiao
         OPENWRT_ARMVIRT: openwrt-armvirt/*.tar.gz
