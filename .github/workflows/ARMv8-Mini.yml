@@ -195,7 +195,7 @@ jobs:
           
         echo -e "\n"
         echo "列出空间占用前10的目录或文件："
-        sudo du -h --max-depth=1 /workdir |sort -nr | head -10
+        sudo du -h --max-depth=1 /builder |sort -nr | head -10
         
         rm -rf /builder/openwrt/ && sync
         
