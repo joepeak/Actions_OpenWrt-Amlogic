@@ -94,6 +94,8 @@ jobs:
     - name: 拷贝配置选项
       id: variable
       run: |
+        echo "CONFIG_FILE" [ -e $CONFIG_FILE ]
+        
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         cd $OPENWRT_PATH
         make defconfig > /dev/null 2>&1
