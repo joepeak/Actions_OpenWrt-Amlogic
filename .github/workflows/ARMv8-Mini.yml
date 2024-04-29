@@ -112,7 +112,7 @@ jobs:
         echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
         echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_OUTPUT
 
-    - name: 拷贝配置选项
+    - name: 生成环境变量
       id: variable
       run: |
         [[ -e "${CONFIG_FILE}" ]] && cp -f ${CONFIG_FILE} $OPENWRT_PATH/.config
@@ -151,6 +151,7 @@ jobs:
     - name: 加载自定义配置
       run: |
         [ -e files ] && mv -f files openwrt/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_PATH/.config
         chmod +x $DIY_P2_SH
         cd $OPENWRT_PATH
         $GITHUB_WORKSPACE/$DIY_P2_SH
