@@ -155,6 +155,10 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
+        #据说重新执行一次可以解决很多警告
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        
     - name: 加载自定义配置
       run: |
         [ -e files ] && mv -f files openwrt/files
