@@ -23,7 +23,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
-
+    if: ${{ github.event.repository.owner.id }} == ${{ github.event.sender.id }}
+    
     outputs:
       COMMIT_AUTHOR: ${{ steps.clone.outputs.COMMIT_AUTHOR }}
       COMMIT_DATE: ${{ steps.clone.outputs.COMMIT_DATE }}
@@ -56,6 +57,7 @@ jobs:
         df -Th
 
     - name: 初始化编译环境
+      id: init
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -73,6 +75,8 @@ jobs:
         sudo rm -rf ~/{.cargo,.dotnet,.rustup}
         sudo timedatectl set-timezone "${TZ}"
 
+        echo "status=success" >> ${GITHUB_OUTPUT}
+        
     - name: 创建模拟物理磁盘
       run: |
           mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
@@ -92,7 +96,9 @@ jobs:
           df -Th
           
     - name: 克隆源码
+      id: codes
       working-directory: /builder
+      if: ${{ steps.init.outputs.status }} == 'success' && !cancelled()
       run: |
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /builder/openwrt ${GITHUB_WORKSPACE}/openwrt
@@ -110,8 +116,9 @@ jobs:
         echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
         COMMIT_HASH=$(git show -s --date=short --format="hash: %H")
         echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
-        echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_OUTPUT
-
+        
+        echo "status=success" >> ${GITHUB_OUTPUT}
+       
     - name: 生成环境变量
       id: variable
       run: |
@@ -178,9 +185,11 @@ jobs:
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
+        echo "status=success" >> ${GITHUB_OUTPUT}
+        
     - name: 清理磁盘空间
       id: clean
-      if: (!cancelled())
+      if: ${{ steps.compile.outputs.status }} == 'success' && !cancelled()
       run: |
         echo "清理之前："
         df -hT
